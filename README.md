@@ -70,12 +70,36 @@ npm test
 - `columns`: column definitions (`id`, `header`, `accessor`, `sortable`, `searchable`, `render`)
 - `pagination`: `{ enabled, pageSize, pageSizes }`
 - `virtualization`: `{ enabled, height, rowHeight, overscan }`
+- `scroll`: `{ x, y, minColumnWidth }`
 - `state`: persistent state (`localStorage`) with custom key
 - `server`: async query mode using `fetch(query)`
 - `security`: `{ allowUnsafeHtml, sanitizer }`
 - `layout`: tokenized control placement:
   - `topStart`, `topEnd`, `bottomStart`, `bottomEnd`
   - tokens: `search`, `pageSize`, `info`, `pager`
+
+## Wide tables and horizontal scroll
+
+The table now supports many columns by default:
+
+- horizontal scrolling is enabled on the table container
+- columns get a default minimum width (`scroll.minColumnWidth`, default `128`)
+- cells use `white-space: nowrap` so columns stay readable and rows keep stable height
+
+Example:
+
+```js
+const table = new BetterDataTable("#table", {
+  scroll: {
+    x: true,
+    minColumnWidth: 140
+  },
+  columns: [
+    { id: "id", header: "ID", accessor: "id", width: "90px" },
+    { id: "description", header: "Description", accessor: "description", wrap: true }
+  ]
+});
+```
 
 ## Lifecycle events
 
@@ -131,3 +155,4 @@ Then open:
 
 - `http://localhost:4173/` (defaults to the demo page)
 - or `http://localhost:4173/examples/index.html`
+- wide-column demo: `http://localhost:4173/examples/wide-columns.html`

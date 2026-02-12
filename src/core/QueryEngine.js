@@ -1,5 +1,7 @@
 import { parseAccessor, toText } from "./utils.js";
 
+// Keep null and undefined at the end for ascending order.
+// This avoids empty values jumping ahead of real data.
 function compareValues(a, b, direction) {
   if (a === b) {
     return 0;
@@ -28,6 +30,7 @@ function compareValues(a, b, direction) {
 }
 
 export class QueryEngine {
+  // QueryEngine is pure by design: it computes row sets but never touches the DOM.
   constructor({ columns = [], caseSensitive = false } = {}) {
     this.caseSensitive = caseSensitive;
     this.setColumns(columns);
@@ -63,6 +66,7 @@ export class QueryEngine {
     const searchableColumns = this.columns.filter((column) => column.searchable);
     const searchValue = this.caseSensitive ? toText(search) : toText(search).toLowerCase();
 
+    // Keep the original index so we can preserve stable sort order later.
     const decorated = [];
     for (let index = 0; index < this.rows.length; index += 1) {
       const row = this.rows[index];

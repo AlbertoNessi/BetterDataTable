@@ -3,6 +3,8 @@ import { QueryEngine } from "./QueryEngine.js";
 import { StateStore } from "./StateStore.js";
 import { clamp, debounce, deepMerge, isDomNode, parseAccessor, toText, uniqueId } from "./utils.js";
 
+// These defaults are part of the public behavior.
+// Keep changes here deliberate because they affect every table instance.
 const DEFAULT_OPTIONS = {
   columns: [],
   data: [],
@@ -33,6 +35,11 @@ const DEFAULT_OPTIONS = {
     height: 420,
     rowHeight: 40,
     overscan: 8
+  },
+  scroll: {
+    x: true,
+    y: true,
+    minColumnWidth: 128
   },
   state: {
     enabled: true,
@@ -83,11 +90,14 @@ function resolveElement(target) {
 }
 
 export class BetterDataTable {
+  // BetterDataTable owns one root container and redraws inside it.
+  // Outside code should interact through public APIs and delegated events.
   constructor(target, options = {}) {
     this.root = resolveElement(target);
 
     this.options = deepMerge(DEFAULT_OPTIONS, options);
     this.options.columns = normalizeColumns(this.options.columns);
+    // location is not available in SSR and some test runners.
     const statePath = typeof location === "undefined" ? "memory" : location.pathname;
     this.options.state.key =
       this.options.state.key ||
@@ -150,6 +160,7 @@ export class BetterDataTable {
     this.root.classList.add("bdt-host");
     this.root.replaceChildren();
 
+    // Keep this order: build DOM shell, render headers, bind listeners, then load data.
     this.#buildShell();
     this.#renderHeader();
     this.#attachCoreListeners();
@@ -182,9 +193,13 @@ export class BetterDataTable {
     this.tableWrap.className = "bdt__table-wrap";
     this.tableWrap.tabIndex = 0;
 
+    const xScrollEnabled = this.options.scroll.x !== false;
+    const yScrollEnabled = this.options.virtualization.enabled || this.options.scroll.y !== false;
+    this.tableWrap.style.overflowX = xScrollEnabled ? "auto" : "hidden";
+    this.tableWrap.style.overflowY = yScrollEnabled ? "auto" : "hidden";
+
     if (this.options.virtualization.enabled) {
       this.tableWrap.style.maxHeight = `${this.options.virtualization.height}px`;
-      this.tableWrap.style.overflow = "auto";
     }
 
     this.table = document.createElement("table");
@@ -209,6 +224,13 @@ export class BetterDataTable {
     this.liveRegion.setAttribute("aria-atomic", "true");
 
     this.container.append(this.top, this.tableWrap, this.bottom, this.liveRegion);
+
+    const minColumnWidth = this.options.scroll.minColumnWidth;
+    if (minColumnWidth !== null && minColumnWidth !== undefined) {
+      const widthValue = typeof minColumnWidth === "number" ? `${minColumnWidth}px` : String(minColumnWidth);
+      this.container.style.setProperty("--bdt-col-min-width", widthValue);
+    }
+
     this.root.append(this.container);
   }
 
@@ -319,6 +341,9 @@ export class BetterDataTable {
       if (column.width) {
         th.style.width = column.width;
       }
+      if (column.wrap === true) {
+        th.classList.add("bdt__cell--wrap");
+      }
 
       if (column.sortable === false) {
         th.textContent = column.header;
@@ -342,6 +367,7 @@ export class BetterDataTable {
   }
 
   #attachCoreListeners() {
+    // Debounce prevents one render for every keypress on large datasets.
     const onSearch = debounce((event) => {
       this.setSearch(event.target.value);
     }, this.options.filtering.debounceMs);
@@ -410,8 +436,19 @@ export class BetterDataTable {
 
     if (this.options.virtualization.enabled) {
       this.#listen(this.tableWrap, "scroll", () => {
-        this.state.scrollTop = this.tableWrap.scrollTop;
-        this.requestRender("scroll");
+        const nextScrollTop = this.tableWrap.scrollTop;
+        if (nextScrollTop === this.state.scrollTop) {
+          return;
+        }
+
+        const rowHeight = Math.max(24, this.options.virtualization.rowHeight);
+        const previousRow = Math.floor(this.state.scrollTop / rowHeight);
+        const nextRow = Math.floor(nextScrollTop / rowHeight);
+
+        this.state.scrollTop = nextScrollTop;
+        if (nextRow !== previousRow) {
+          this.requestRender("scroll");
+        }
       });
     }
   }
@@ -472,6 +509,8 @@ export class BetterDataTable {
       };
     }
 
+    // Virtualization currently assumes constant row height.
+    // TODO: support variable-height rows without forcing callers to disable virtualization.
     const rowHeight = Math.max(24, this.options.virtualization.rowHeight);
     const overscan = Math.max(1, this.options.virtualization.overscan);
     const viewportHeight = Math.max(rowHeight, this.options.virtualization.height);
@@ -528,6 +567,9 @@ export class BetterDataTable {
       this.options.columns.forEach((column, colIndex) => {
         const td = document.createElement("td");
         td.className = column.className || "";
+        if (column.wrap === true) {
+          td.classList.add("bdt__cell--wrap");
+        }
         td.setAttribute("data-row-index", String(pageRowIndex));
         td.setAttribute("data-col-index", String(colIndex));
         td.tabIndex = -1;
@@ -544,6 +586,7 @@ export class BetterDataTable {
       fragment.append(this.#createSpacerRow(bottomPad));
     }
 
+    // Replace tbody content in one shot to avoid partial DOM states between rows.
     this.body.replaceChildren(fragment);
     this.#applyCellTabStops();
 
@@ -614,6 +657,7 @@ export class BetterDataTable {
       }
 
       if (Object.prototype.hasOwnProperty.call(rendered, "html")) {
+        // Raw HTML is opt-in because many table XSS bugs start in cell renderers.
         if (!this.options.security.allowUnsafeHtml) {
           td.textContent = toText(rendered.html);
           this.#emit("error", {
@@ -662,6 +706,8 @@ export class BetterDataTable {
     } else {
       const safePageSize = Math.max(1, Number(this.state.pageSize) || 1);
       const pageOffset = this.options.pagination.enabled ? page * safePageSize : 0;
+      // startRowIndex and endRowIndex are page-local when virtualization is on.
+      // pageOffset converts them back to table-global row numbers for the footer text.
       const start = pageOffset + (this.options.virtualization.enabled ? startRowIndex + 1 : 1);
       const end = pageOffset + (this.options.virtualization.enabled ? endRowIndex : pageRows.length);
       this.info.textContent = `Showing ${start}-${end} of ${filteredCount} rows (${totalCount} total)`;
@@ -778,6 +824,7 @@ export class BetterDataTable {
 
     event.preventDefault();
 
+    // Roving tabindex keeps keyboard focus inside one active cell.
     this.lastFocusedCell = { row: nextRow, col: nextCol };
     this.needsDomFocus = true;
 
@@ -877,6 +924,7 @@ export class BetterDataTable {
       return;
     }
 
+    // Coalesce multiple state updates into a single frame render.
     this.renderToken = requestAnimationFrame(() => {
       this.renderToken = null;
       const reasons = [...this.pendingReasons];
@@ -926,6 +974,7 @@ export class BetterDataTable {
         state: this.getState()
       });
 
+      // Only the latest request can update the table.
       if (token !== this.requestToken) {
         return;
       }
@@ -1113,6 +1162,7 @@ export class BetterDataTable {
   }
 
   onCell(eventName, selector, handler) {
+    // Use event delegation so handlers survive row redraws and virtualization.
     const listener = (event) => {
       const match = event.target.closest(selector);
       if (!match || !this.body.contains(match)) {
@@ -1141,6 +1191,7 @@ export class BetterDataTable {
   }
 
   destroy() {
+    // Cleanup order is important: stop scheduled renders, remove listeners, then clear DOM.
     if (this.renderToken !== null) {
       cancelAnimationFrame(this.renderToken);
       this.renderToken = null;

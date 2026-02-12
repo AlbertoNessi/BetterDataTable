@@ -29,6 +29,7 @@ export interface BetterDataTableColumn<Row = Record<string, unknown>> {
   searchable?: boolean;
   className?: string;
   width?: string;
+  wrap?: boolean;
   render?: (value: unknown, row: Row, context: RenderContext<Row>) => RenderResult;
 }
 
@@ -56,6 +57,11 @@ export interface BetterDataTableOptions<Row = Record<string, unknown>> {
     height?: number;
     rowHeight?: number;
     overscan?: number;
+  };
+  scroll?: {
+    x?: boolean;
+    y?: boolean;
+    minColumnWidth?: number | string;
   };
   state?: {
     enabled?: boolean;

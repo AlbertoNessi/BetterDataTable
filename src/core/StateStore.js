@@ -16,6 +16,7 @@ export class StateStore {
         return fallbackState;
       }
 
+      // Merge with fallback so new state fields appear after upgrades.
       return {
         ...fallbackState,
         ...JSON.parse(raw)

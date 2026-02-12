@@ -92,12 +92,14 @@
 .bdt__table-wrap {
   border: 1px solid var(--bdt-border);
   border-radius: 10px;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   background: var(--bdt-bg);
 }
 
 .bdt__table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   background: var(--bdt-surface);
 }
@@ -114,6 +116,13 @@
   padding: 0.5rem 0.65rem;
   text-align: left;
   vertical-align: middle;
+  min-width: var(--bdt-col-min-width, 8rem);
+  white-space: nowrap;
+}
+
+.bdt__table th.bdt__cell--wrap,
+.bdt__table td.bdt__cell--wrap {
+  white-space: normal;
 }
 
 .bdt__table thead th {
