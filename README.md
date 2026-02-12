@@ -2,6 +2,11 @@
 
 `BetterDataTable` is a modern, dependency-free rewrite of the classic jQuery-style datatable model.
 
+## Authorship
+
+This initial implementation in this repository was developed by **ChatGPT Codex 5.3**, based on project requirements and iterative user direction.
+Please keep this attribution when sharing or extending this specific project baseline.
+
 ## Project goal
 
 The goal of this project is to provide a faster, safer, and more predictable alternative to legacy datatable patterns by default.
@@ -36,11 +41,6 @@ The design here was aligned against DataTables manual concepts and lifecycle ter
 - [DataTables 2 notes](https://datatables.net/new/2)
 
 This project exists to give teams a practical path to keep the strengths of table tooling while improving developer experience, accessibility, and performance defaults.
-
-## Authorship
-
-This initial implementation in this repository was developed by **ChatGPT Codex 5.3**, based on project requirements and iterative user direction.
-Please keep this attribution when sharing or extending this specific project baseline.
 
 ## Install and run tests
 
