@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BetterDataTable Example</title>
+    <link rel="stylesheet" href="../styles/better-data-table.css" />
+    <style>
+      body {
+        margin: 0;
+        background: radial-gradient(circle at 20% 0%, #dbeafe, #f8fafc 45%, #f1f5f9 100%);
+        font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+        color: #0f172a;
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      h1 {
+        margin: 0 0 0.35rem;
+        font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+      }
+
+      p {
+        margin: 0 0 1rem;
+        color: #475569;
+      }
+
+      #table {
+        min-height: 460px;
+      }
+
+      .status {
+        margin-top: 0.8rem;
+        font-size: 0.95rem;
+        color: #0f766e;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>BetterDataTable</h1>
+      <p>Virtualized rendering + explicit lifecycle + safe text rendering by default.</p>
+      <div id="table"></div>
+      <div id="status" class="status" aria-live="polite"></div>
+    </main>
+
+    <script type="module">
+      import { BetterDataTable } from "../src/index.js";
+
+      const rows = Array.from({ length: 50000 }, (_, i) => {
+        return {
+          id: i + 1,
+          name: `User ${i + 1}`,
+          email: `user${i + 1}@example.com`,
+          region: ["NA", "EU", "APAC", "LATAM"][i % 4],
+          balance: Math.round(Math.random() * 25000) / 100
+        };
+      });
+
+      const table = new BetterDataTable("#table", {
+        caption: "Customer accounts",
+        rowKey: "id",
+        data: rows,
+        columns: [
+          { id: "id", header: "ID", accessor: "id", width: "90px" },
+          { id: "name", header: "Name", accessor: "name" },
+          { id: "email", header: "Email", accessor: "email" },
+          { id: "region", header: "Region", accessor: "region", width: "120px" },
+          {
+            id: "balance",
+            header: "Balance",
+            accessor: "balance",
+            render: (value) => ({ text: `$${Number(value).toFixed(2)}` }),
+            width: "140px"
+          }
+        ],
+        pagination: {
+          enabled: true,
+          pageSize: 100,
+          pageSizes: [25, 50, 100, 250]
+        },
+        virtualization: {
+          enabled: true,
+          rowHeight: 36,
+          height: 420,
+          overscan: 10
+        },
+        state: {
+          enabled: true,
+          key: "demo-customers"
+        }
+      });
+
+      const status = document.querySelector("#status");
+      table.on("afterRender", ({ duration, rowsRendered }) => {
+        status.textContent = `Rendered ${rowsRendered} rows in ${duration.toFixed(1)}ms.`;
+      });
+
+      window.table = table;
+    </script>
+  </body>
+</html>

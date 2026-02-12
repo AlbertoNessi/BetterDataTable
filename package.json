@@ -1,0 +1,29 @@
+{
+  "name": "better-data-table",
+  "version": "0.1.0",
+  "description": "A safer, faster and explicit-lifecycle data table library",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/types.d.ts"
+    },
+    "./jquery": {
+      "import": "./src/adapters/jquery.js"
+    },
+    "./styles": "./styles/better-data-table.css"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node ./scripts/serve.mjs"
+  },
+  "keywords": [
+    "datatable",
+    "table",
+    "virtualization",
+    "accessibility",
+    "jquery"
+  ],
+  "license": "MIT"
+}
