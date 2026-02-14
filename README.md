@@ -2,6 +2,10 @@
 
 `BetterDataTable` is a modern, dependency-free rewrite of the classic jQuery-style datatable model.
 
+## Tech stack
+
+- Only Vanilla JavaScript only (ES modules)
+
 ## Authorship
 
 This initial implementation in this repository was developed by **ChatGPT Codex 5.3**, based on project requirements and iterative user direction.
@@ -47,6 +51,23 @@ This project exists to give teams a practical path to keep the strengths of tabl
 ```bash
 npm test
 ```
+
+## Compatibility verification
+
+Compatibility is validated by automated tests in `test/jquery-compat.test.js`.
+
+Current verified matrix:
+
+- jQuery `4.0.0` (latest stable)
+- jQuery `3.7.1` (latest 3.x)
+
+The test suite checks:
+
+- plugin install and initialization via `$.fn.betterDataTable`
+- jQuery chainability
+- instance retrieval (`instance`)
+- method dispatch (`setSearch`)
+- teardown (`destroy`)
 
 ## Usage
 

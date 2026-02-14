@@ -5,10 +5,7 @@
   "type": "module",
   "main": "./src/index.js",
   "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "types": "./src/types.d.ts"
-    },
+    ".": "./src/index.js",
     "./jquery": {
       "import": "./src/adapters/jquery.js"
     },
@@ -25,5 +22,10 @@
     "accessibility",
     "jquery"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jquery3": "npm:jquery@^3.7.1",
+    "jquery4": "npm:jquery@^4.0.0",
+    "jsdom": "^27.0.1"
+  }
 }
