@@ -130,12 +130,72 @@ const table = new BetterDataTable("#table", {
 - `pagination`: `{ enabled, pageSize, pageSizes }`
 - `virtualization`: `{ enabled, height, rowHeight, overscan }`
 - `scroll`: `{ x, y, minColumnWidth }`
+- `theme`: color tokens for instant visual customization
+- `icons`: icon/label settings for pager and sort buttons
 - `state`: persistent state (`localStorage`) with custom key
 - `server`: async query mode using `fetch(query)`
 - `security`: `{ allowUnsafeHtml, sanitizer }`
 - `layout`: tokenized control placement:
   - `topStart`, `topEnd`, `bottomStart`, `bottomEnd`
   - tokens: `search`, `pageSize`, `info`, `pager`
+
+## Super simple customization
+
+You can customize colors and icons directly in the constructor.
+
+```js
+const table = new BetterDataTable("#table", {
+  columns,
+  data,
+  theme: {
+    background: "#f4f6f8",
+    surface: "#ffffff",
+    panelAlt: "#eef2f6",
+    border: "#c7d0db",
+    borderStrong: "#9eacbc",
+    text: "#102133",
+    textMuted: "#4a5b6d",
+    accent: "#0b63ce",
+    accentSoft: "#e7f0ff",
+    focus: "#0b63ce",
+    headerBackground: "#dde6f2",
+    headerText: "#0f2740",
+    rowAlt: "#f8fbff"
+  },
+  icons: {
+    previous: { icon: "«", label: "Prev", position: "start" },
+    next: { icon: "»", label: "Next", position: "end" },
+    sortNone: "⇅",
+    sortAsc: "▲",
+    sortDesc: "▼"
+  }
+});
+```
+
+You can also use custom icon elements:
+
+```js
+icons: {
+  next: {
+    icon: () => {
+      const el = document.createElement("span");
+      el.textContent = "➜";
+      return el;
+    },
+    label: "Next"
+  }
+}
+```
+
+If you prefer pure CSS theming, override variables on `.bdt`:
+
+```css
+#table .bdt {
+  --bdt-accent: #0056b3;
+  --bdt-header-bg: #e6edf5;
+  --bdt-border: #c6d0dc;
+}
+```
 
 ## Wide tables and horizontal scroll
 
@@ -215,3 +275,4 @@ Then open:
 - `http://localhost:4173/` (defaults to the demo page)
 - or `http://localhost:4173/examples/index.html`
 - wide-column demo: `http://localhost:4173/examples/wide-columns.html`
+- FC Barcelona theme demo: `http://localhost:4173/examples/fc-barcelona-theme.html`

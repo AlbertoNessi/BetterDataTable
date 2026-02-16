@@ -50,6 +50,14 @@ const DEFAULT_OPTIONS = {
     announce: true,
     label: "Data table"
   },
+  theme: {},
+  icons: {
+    previous: { icon: "←", label: "Previous", position: "start" },
+    next: { icon: "→", label: "Next", position: "end" },
+    sortNone: "↕",
+    sortAsc: "↑",
+    sortDesc: "↓"
+  },
   security: {
     allowUnsafeHtml: false,
     sanitizer: null
@@ -60,6 +68,46 @@ const DEFAULT_OPTIONS = {
   },
   hooks: {}
 };
+
+const THEME_VAR_MAP = Object.freeze({
+  background: "--bdt-bg",
+  surface: "--bdt-surface",
+  panelAlt: "--bdt-panel-alt",
+  border: "--bdt-border",
+  borderStrong: "--bdt-border-strong",
+  text: "--bdt-text",
+  textMuted: "--bdt-text-muted",
+  accent: "--bdt-accent",
+  accentSoft: "--bdt-accent-soft",
+  focus: "--bdt-focus",
+  headerBackground: "--bdt-header-bg",
+  headerText: "--bdt-header-text",
+  rowAlt: "--bdt-row-alt"
+});
+
+function normalizeButtonConfig(config, fallbackLabel, fallbackIcon, fallbackPosition) {
+  if (typeof config === "string" || typeof config === "function" || isDomNode(config)) {
+    return {
+      label: fallbackLabel,
+      icon: config,
+      position: fallbackPosition
+    };
+  }
+
+  if (config && typeof config === "object") {
+    return {
+      label: config.label === undefined ? fallbackLabel : toText(config.label),
+      icon: config.icon === undefined ? fallbackIcon : config.icon,
+      position: config.position === "end" ? "end" : fallbackPosition
+    };
+  }
+
+  return {
+    label: fallbackLabel,
+    icon: fallbackIcon,
+    position: fallbackPosition
+  };
+}
 
 function normalizeColumns(columns) {
   return (columns || []).map((column, index) => {
@@ -183,6 +231,7 @@ export class BetterDataTable {
     this.container = document.createElement("section");
     this.container.className = "bdt";
     this.container.setAttribute("aria-label", this.options.a11y.label);
+    this.#applyThemeTokens();
 
     this.controls = this.#createControls();
 
@@ -234,6 +283,79 @@ export class BetterDataTable {
     this.root.append(this.container);
   }
 
+  #applyThemeTokens() {
+    for (const [token, value] of Object.entries(this.options.theme || {})) {
+      const cssVar = THEME_VAR_MAP[token];
+      if (!cssVar || value === undefined || value === null) {
+        continue;
+      }
+      this.container.style.setProperty(cssVar, toText(value));
+    }
+  }
+
+  #renderIconContent(target, iconConfig, context = {}) {
+    target.replaceChildren();
+    target.textContent = "";
+
+    const resolved = typeof iconConfig === "function" ? iconConfig(context) : iconConfig;
+    if (resolved === undefined || resolved === null || resolved === false || resolved === "") {
+      return false;
+    }
+
+    if (isDomNode(resolved)) {
+      target.append(resolved.cloneNode(true));
+      return true;
+    }
+
+    target.textContent = toText(resolved);
+    return target.textContent.length > 0;
+  }
+
+  #applyButtonContent(button, config, { iconClass = "bdt__btn-icon" } = {}) {
+    button.replaceChildren();
+
+    const content = document.createElement("span");
+    content.className = "bdt__btn-content";
+
+    const label = document.createElement("span");
+    label.className = "bdt__btn-label";
+    label.textContent = toText(config.label);
+    button.setAttribute("aria-label", label.textContent);
+
+    const icon = document.createElement("span");
+    icon.className = iconClass;
+    icon.setAttribute("aria-hidden", "true");
+    const hasIcon = this.#renderIconContent(icon, config.icon, {
+      table: this,
+      button,
+      name: button.getAttribute("data-bdt-page") || "button"
+    });
+
+    if (config.position === "end") {
+      content.append(label);
+      if (hasIcon) {
+        content.append(icon);
+      }
+    } else {
+      if (hasIcon) {
+        content.append(icon);
+      }
+      content.append(label);
+    }
+
+    button.append(content);
+  }
+
+  #sortIconForDirection(direction) {
+    if (direction === "asc") {
+      return this.options.icons.sortAsc;
+    }
+    if (direction === "desc") {
+      return this.options.icons.sortDesc;
+    }
+    return this.options.icons.sortNone;
+  }
+
   #createControls() {
     const searchWrap = document.createElement("label");
     searchWrap.className = "bdt__control bdt__control--search";
@@ -280,8 +402,14 @@ export class BetterDataTable {
     this.prevPageButton = document.createElement("button");
     this.prevPageButton.type = "button";
     this.prevPageButton.className = "bdt__btn";
-    this.prevPageButton.textContent = "Previous";
     this.prevPageButton.setAttribute("data-bdt-page", "prev");
+    const previousConfig = normalizeButtonConfig(
+      this.options.icons.previous,
+      "Previous",
+      "←",
+      "start"
+    );
+    this.#applyButtonContent(this.prevPageButton, previousConfig);
 
     this.pageStatus = document.createElement("span");
     this.pageStatus.className = "bdt__page-status";
@@ -289,8 +417,14 @@ export class BetterDataTable {
     this.nextPageButton = document.createElement("button");
     this.nextPageButton.type = "button";
     this.nextPageButton.className = "bdt__btn";
-    this.nextPageButton.textContent = "Next";
     this.nextPageButton.setAttribute("data-bdt-page", "next");
+    const nextConfig = normalizeButtonConfig(
+      this.options.icons.next,
+      "Next",
+      "→",
+      "end"
+    );
+    this.#applyButtonContent(this.nextPageButton, nextConfig);
 
     this.pager.append(this.prevPageButton, this.pageStatus, this.nextPageButton);
 
@@ -352,9 +486,24 @@ export class BetterDataTable {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "bdt__sort-btn";
-        button.textContent = column.header;
         button.setAttribute("data-bdt-sort", column.id);
+        button.setAttribute("data-bdt-sort-label", column.header);
         button.setAttribute("aria-label", `${column.header}, activate to sort ascending`);
+
+        const label = document.createElement("span");
+        label.className = "bdt__sort-label";
+        label.textContent = column.header;
+
+        const icon = document.createElement("span");
+        icon.className = "bdt__sort-icon";
+        icon.setAttribute("aria-hidden", "true");
+        this.#renderIconContent(icon, this.#sortIconForDirection("none"), {
+          table: this,
+          column,
+          direction: "none"
+        });
+
+        button.append(label, icon);
         th.setAttribute("aria-sort", "none");
         th.append(button);
       }
@@ -738,8 +887,18 @@ export class BetterDataTable {
       }
 
       const next = direction === "asc" ? "descending" : "ascending";
-      button.setAttribute("aria-label", `${button.textContent}, activate to sort ${next}`);
+      const labelText = button.getAttribute("data-bdt-sort-label") || button.textContent;
+      button.setAttribute("aria-label", `${labelText}, activate to sort ${next}`);
       button.dataset.sortDirection = direction;
+
+      const icon = button.querySelector(".bdt__sort-icon");
+      if (icon) {
+        this.#renderIconContent(icon, this.#sortIconForDirection(direction), {
+          table: this,
+          columnId,
+          direction
+        });
+      }
     }
   }
 

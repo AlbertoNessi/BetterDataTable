@@ -1,6 +1,12 @@
-:root {
+.bdt-host {
+  color: var(--bdt-text, #1d2a35);
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+
+.bdt {
   --bdt-bg: #f8fafc;
   --bdt-surface: #ffffff;
+  --bdt-panel-alt: #f4f8fb;
   --bdt-border: #d0dae5;
   --bdt-border-strong: #9eb2c8;
   --bdt-text: #1d2a35;
@@ -8,15 +14,11 @@
   --bdt-accent: #0d944a;
   --bdt-accent-soft: #ccfbf1;
   --bdt-focus: #f97316;
-}
-
-.bdt-host {
+  --bdt-header-bg: #e9eff6;
+  --bdt-header-text: #183047;
+  --bdt-row-alt: #fbfdff;
   color: var(--bdt-text);
-  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-}
-
-.bdt {
-  background: linear-gradient(180deg, var(--bdt-surface), #f4f8fb);
+  background: linear-gradient(180deg, var(--bdt-surface), var(--bdt-panel-alt));
   border: 1px solid var(--bdt-border);
 
   box-shadow: 0 10px 24px -18px rgba(0, 17, 43, 0.45);
@@ -62,7 +64,7 @@
 .bdt__btn,
 .bdt__sort-btn {
   border: 1px solid var(--bdt-border-strong);
-  background: #fff;
+  background: var(--bdt-surface);
   color: var(--bdt-text);
   font: inherit;
 }
@@ -76,6 +78,18 @@
 .bdt__btn {
   height: 2rem;
   padding: 0 0.7rem;
+}
+
+.bdt__btn-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.bdt__btn-icon {
+  color: var(--bdt-text-muted);
+  display: inline-flex;
+  align-items: center;
 }
 
 .bdt__btn:hover,
@@ -127,8 +141,8 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #e9eff6;
-  color: #183047;
+  background: var(--bdt-header-bg);
+  color: var(--bdt-header-text);
 }
 
 .bdt__sort-btn {
@@ -141,24 +155,16 @@
   font-weight: 600;
 }
 
-.bdt__sort-btn::after {
-  content: "↕";
+.bdt__sort-icon {
   color: var(--bdt-text-muted);
-  font-size: 0.78rem;
-}
-
-.bdt__sort-btn[data-sort-direction="asc"]::after {
-  content: "↑";
-  color: var(--bdt-accent);
-}
-
-.bdt__sort-btn[data-sort-direction="desc"]::after {
-  content: "↓";
-  color: var(--bdt-accent);
+  display: inline-flex;
+  align-items: center;
+  min-width: 0.9rem;
+  justify-content: center;
 }
 
 .bdt__table tbody tr:nth-child(even):not(.bdt__spacer) {
-  background: #fbfdff;
+  background: var(--bdt-row-alt);
 }
 
 .bdt__table tbody tr:hover:not(.bdt__spacer) {

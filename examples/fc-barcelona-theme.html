@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BetterDataTable - FC Barcelona Theme</title>
+    <link rel="stylesheet" href="../styles/better-data-table.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+        background: linear-gradient(120deg, #001f4d 0%, #004d98 45%, #a50044 100%);
+        color: #f8fafc;
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      h1 {
+        margin: 0 0 0.4rem;
+      }
+
+      p {
+        margin: 0 0 1rem;
+        color: #dbe7ff;
+      }
+
+      #barca-table {
+        min-height: 460px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>FC Barcelona Theme Demo</h1>
+      <p>Using the new theme customization API with Barcelona-inspired colors.</p>
+      <div id="barca-table"></div>
+    </main>
+
+    <script type="module">
+      import { BetterDataTable } from "../src/index.js";
+
+      const squad = [
+        { number: 1, name: "Marc-Andre ter Stegen", position: "Goalkeeper", age: 32, nation: "Germany" },
+        { number: 4, name: "Ronald Araujo", position: "Defender", age: 26, nation: "Uruguay" },
+        { number: 8, name: "Pedri", position: "Midfielder", age: 23, nation: "Spain" },
+        { number: 9, name: "Robert Lewandowski", position: "Forward", age: 37, nation: "Poland" },
+        { number: 11, name: "Raphinha", position: "Forward", age: 29, nation: "Brazil" },
+        { number: 21, name: "Frenkie de Jong", position: "Midfielder", age: 29, nation: "Netherlands" },
+        { number: 23, name: "Jules Kounde", position: "Defender", age: 27, nation: "France" },
+        { number: 27, name: "Lamine Yamal", position: "Forward", age: 18, nation: "Spain" }
+      ];
+
+      new BetterDataTable("#barca-table", {
+        caption: "FC Barcelona Squad",
+        rowKey: "number",
+        data: squad,
+        columns: [
+          { id: "number", header: "No.", accessor: "number", width: "90px" },
+          { id: "name", header: "Player", accessor: "name" },
+          { id: "position", header: "Position", accessor: "position", width: "140px" },
+          { id: "age", header: "Age", accessor: "age", width: "90px" },
+          { id: "nation", header: "Nation", accessor: "nation", width: "140px" }
+        ],
+        pagination: {
+          enabled: true,
+          pageSize: 5,
+          pageSizes: [5, 10, 25]
+        },
+        virtualization: {
+          enabled: false
+        },
+        theme: {
+          background: "#f8f9fc",
+          surface: "#ffffff",
+          panelAlt: "#eef2fb",
+          border: "#004d98",
+          borderStrong: "#a50044",
+          text: "black",
+          textMuted: "darkgrey",
+          accent: "#a50044",
+          accentSoft: "#f9d9e8",
+          focus: "#edbb00",
+          headerBackground: "#004d98",
+          headerText: "black",
+          rowAlt: "#f2f6ff"
+        },
+        icons: {
+          previous: { icon: "<<", label: "Prev" },
+          next: { icon: ">>", label: "Next" },
+          sortNone: "<>",
+          sortAsc: "^",
+          sortDesc: "v"
+        }
+      });
+    </script>
+  </body>
+</html>
