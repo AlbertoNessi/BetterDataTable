@@ -111,7 +111,7 @@ async function runAdapterSmoke(packageName) {
     assert.equal(instance.getRows().length, 1, "search should filter rows through adapter method dispatch");
 
     $("#table").betterDataTable("destroy");
-    assert.equal(dom.window.document.querySelector("#table").children.length, 0, "destroy should clear host content");
+    assert.equal(dom.window.document.querySelector("#table").children.length, 0, "foy should clear host content");
 
     assert.throws(
       () => $("#table").betterDataTable("unknownMethod"),

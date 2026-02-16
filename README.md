@@ -69,12 +69,50 @@ The test suite checks:
 - method dispatch (`setSearch`)
 - teardown (`destroy`)
 
-## Usage
+## How to import this library
+
+`./src/index.js` is only for contributors working inside this repository.
+
+If you are using this library in another project, install it first:
+
+```bash
+npm install github:AlbertoNessi/BetterDataTable
+```
+
+Then import it by package name:
+
+```js
+import { BetterDataTable } from "better-data-table";
+import "better-data-table/styles";
+```
+
+If you are developing inside this repository, use:
+
+```js
+import { BetterDataTable } from "./src/index.js";
+```
+
+## Usage (with bundler)
+
+```js
+import { BetterDataTable } from "better-data-table";
+import "better-data-table/styles";
+
+const table = new BetterDataTable("#table", {
+  data: [{ id: 1, name: "Ada" }, { id: 2, name: "Lin" }],
+  columns: [
+    { id: "id", header: "ID", accessor: "id", width: "90px" },
+    { id: "name", header: "Name", accessor: "name" }
+  ]
+});
+```
+
+## Usage (plain browser, no bundler)
 
 ```html
-<link rel="stylesheet" href="./styles/better-data-table.css" />
+<link rel="stylesheet" href="/node_modules/better-data-table/styles/better-data-table.css" />
 <script type="module">
-  import { BetterDataTable } from "./src/index.js";
+  import { BetterDataTable } from "/node_modules/better-data-table/src/index.js";
 
   const table = new BetterDataTable("#table", {
     data: [{ id: 1, name: "Ada" }, { id: 2, name: "Lin" }],
