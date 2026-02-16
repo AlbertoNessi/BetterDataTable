@@ -5,7 +5,7 @@
   --bdt-border-strong: #9eb2c8;
   --bdt-text: #1d2a35;
   --bdt-text-muted: #4e6378;
-  --bdt-accent: #0d9488;
+  --bdt-accent: #0d944a;
   --bdt-accent-soft: #ccfbf1;
   --bdt-focus: #f97316;
 }
@@ -18,7 +18,7 @@
 .bdt {
   background: linear-gradient(180deg, var(--bdt-surface), #f4f8fb);
   border: 1px solid var(--bdt-border);
-  border-radius: 12px;
+
   box-shadow: 0 10px 24px -18px rgba(0, 17, 43, 0.45);
   padding: 0.85rem;
 }
@@ -61,7 +61,6 @@
 .bdt__select,
 .bdt__btn,
 .bdt__sort-btn {
-  border-radius: 8px;
   border: 1px solid var(--bdt-border-strong);
   background: #fff;
   color: var(--bdt-text);
@@ -91,7 +90,6 @@
 
 .bdt__table-wrap {
   border: 1px solid var(--bdt-border);
-  border-radius: 10px;
   overflow-x: auto;
   overflow-y: auto;
   background: var(--bdt-bg);
