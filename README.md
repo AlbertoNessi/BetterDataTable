@@ -141,6 +141,100 @@ const table = new BetterDataTable("#table", {
 </script>
 ```
 
+## Symfony integration (Symfony 5)
+
+A working Symfony 5 integration example is included in this repository at:
+
+- `symfony5-integration/`
+
+It exposes:
+
+- `GET /` (demo page)
+- `GET /api/players` (client-side data mode)
+- `GET /api/players/server` (server query mode)
+
+### Option A: Symfony + Webpack Encore (recommended)
+
+Install the package in your Symfony app:
+
+```bash
+npm install better-data-table
+```
+
+Import BetterDataTable in `assets/app.js`:
+
+```js
+import { BetterDataTable } from "better-data-table";
+import "better-data-table/styles";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const host = document.querySelector("#players-table");
+  if (!host) return;
+
+  const response = await fetch("/api/players");
+  const players = await response.json();
+
+  new BetterDataTable(host, {
+    columns: [
+      { id: "id", header: "ID", accessor: "id", width: "80px" },
+      { id: "name", header: "Name", accessor: "name" },
+      { id: "club", header: "Club", accessor: "club.name" },
+      { id: "age", header: "Age", accessor: "age", width: "90px" }
+    ],
+    data: players,
+    pagination: { enabled: true, pageSize: 10, pageSizes: [10, 25, 50] },
+    virtualization: { enabled: true, height: 360, rowHeight: 40, overscan: 6 },
+    state: { enabled: true, key: "players-table" }
+  });
+});
+```
+
+Add a host element in Twig:
+
+```twig
+<div id="players-table"></div>
+```
+
+### Option B: Symfony API + BetterDataTable server mode
+
+Use BetterDataTable `server.fetch` to delegate search/sort/pagination to Symfony:
+
+```js
+const table = new BetterDataTable("#players-table", {
+  columns: [
+    { id: "id", header: "ID", accessor: "id" },
+    { id: "name", header: "Name", accessor: "name" },
+    { id: "club", header: "Club", accessor: "club.name" },
+    { id: "age", header: "Age", accessor: "age" }
+  ],
+  pagination: { enabled: true, pageSize: 10, pageSizes: [10, 25, 50] },
+  virtualization: { enabled: false },
+  server: {
+    enabled: true,
+    fetch: async (query) => {
+      const params = new URLSearchParams({
+        search: query.search ?? "",
+        page: String(query.page ?? 0),
+        pageSize: String(query.pageSize ?? 10),
+        sort: JSON.stringify(query.sort ?? [])
+      });
+      const res = await fetch(`/api/players/server?${params.toString()}`);
+      return res.json();
+    }
+  }
+});
+```
+
+Symfony endpoint response shape:
+
+```json
+{
+  "rows": [{ "id": 1, "name": "Ada", "club": { "name": "FC Example" }, "age": 23 }],
+  "filteredCount": 1,
+  "totalCount": 200
+}
+```
+
 ## Key options
 
 - `columns`: column definitions (`id`, `header`, `accessor`, `sortable`, `searchable`, `render`)

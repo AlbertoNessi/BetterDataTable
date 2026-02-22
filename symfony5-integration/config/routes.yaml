@@ -1,0 +1,11 @@
+app_demo_home:
+    path: /
+    controller: App\Controller\BetterDataTableDemoController::index
+
+app_demo_players:
+    path: /api/players
+    controller: App\Controller\BetterDataTableDemoController::players
+
+app_demo_players_server:
+    path: /api/players/server
+    controller: App\Controller\BetterDataTableDemoController::playersServer
