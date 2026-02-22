@@ -66,3 +66,28 @@ export function debounce(fn, waitMs) {
     }, waitMs);
   };
 }
+
+export function replaceChildren(target, ...children) {
+  if (typeof target.replaceChildren === "function") {
+    target.replaceChildren(...children);
+    return;
+  }
+
+  while (target.firstChild) {
+    target.removeChild(target.firstChild);
+  }
+
+  for (const child of children) {
+    if (child === null || child === undefined) {
+      continue;
+    }
+
+    if (typeof child === "string" || typeof child === "number" || typeof child === "boolean") {
+      const text = target.ownerDocument.createTextNode(String(child));
+      target.appendChild(text);
+      continue;
+    }
+
+    target.appendChild(child);
+  }
+}

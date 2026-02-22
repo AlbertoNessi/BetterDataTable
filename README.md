@@ -69,6 +69,23 @@ The test suite checks:
 - method dispatch (`setSearch`)
 - teardown (`destroy`)
 
+## Browser compatibility hardening
+
+To improve support for older major browser versions, the table now avoids relying directly on
+`Element.prototype.replaceChildren`, which is not available in some older runtimes.
+
+What was added:
+
+- a compatibility helper in `src/core/utils.js` (`replaceChildren(target, ...children)`)
+- integration of that helper in `src/core/BetterDataTable.js` for all table clear/replace operations
+- a regression test in `test/browser-compat.test.js` that removes `replaceChildren` from the DOM prototype and verifies init, render, and destroy still work
+
+You can run the compatibility tests with:
+
+```bash
+npm test
+```
+
 ## How to import this library
 
 `./src/index.js` is only for contributors working inside this repository.

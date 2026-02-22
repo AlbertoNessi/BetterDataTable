@@ -1,7 +1,7 @@
 import { EventBus } from "./EventBus.js";
 import { QueryEngine } from "./QueryEngine.js";
 import { StateStore } from "./StateStore.js";
-import { clamp, debounce, deepMerge, isDomNode, parseAccessor, toText, uniqueId } from "./utils.js";
+import { clamp, debounce, deepMerge, isDomNode, parseAccessor, replaceChildren, toText, uniqueId } from "./utils.js";
 
 // These defaults are part of the public behavior.
 // Keep changes here deliberate because they affect every table instance.
@@ -206,7 +206,7 @@ export class BetterDataTable {
     this.#emit("beforeInit", { table: this });
 
     this.root.classList.add("bdt-host");
-    this.root.replaceChildren();
+    replaceChildren(this.root);
 
     // Keep this order: build DOM shell, render headers, bind listeners, then load data.
     this.#buildShell();
@@ -294,7 +294,7 @@ export class BetterDataTable {
   }
 
   #renderIconContent(target, iconConfig, context = {}) {
-    target.replaceChildren();
+    replaceChildren(target);
     target.textContent = "";
 
     const resolved = typeof iconConfig === "function" ? iconConfig(context) : iconConfig;
@@ -312,7 +312,7 @@ export class BetterDataTable {
   }
 
   #applyButtonContent(button, config, { iconClass = "bdt__btn-icon" } = {}) {
-    button.replaceChildren();
+    replaceChildren(button);
 
     const content = document.createElement("span");
     content.className = "bdt__btn-content";
@@ -511,7 +511,7 @@ export class BetterDataTable {
       row.append(th);
     }
 
-    this.head.replaceChildren(row);
+    replaceChildren(this.head, row);
     this.#updateSortA11y();
   }
 
@@ -697,7 +697,7 @@ export class BetterDataTable {
       td.textContent = this.options.emptyMessage;
       row.append(td);
       fragment.append(row);
-      this.body.replaceChildren(fragment);
+      replaceChildren(this.body, fragment);
       return;
     }
 
@@ -736,7 +736,7 @@ export class BetterDataTable {
     }
 
     // Replace tbody content in one shot to avoid partial DOM states between rows.
-    this.body.replaceChildren(fragment);
+    replaceChildren(this.body, fragment);
     this.#applyCellTabStops();
 
     if (this.needsDomFocus) {
@@ -1368,7 +1368,7 @@ export class BetterDataTable {
 
     this.events.clear();
 
-    this.root.replaceChildren();
+    replaceChildren(this.root);
     this.root.classList.remove("bdt-host");
   }
 }
